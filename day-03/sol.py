@@ -11,7 +11,7 @@ def part1_power_consumption(diagnostic_report: t.Sequence[str]) -> int:
     parities = [0] * bit_len
     for s in diagnostic_report:
         for i, c in enumerate(s):
-            if abs(parities[i]) <= min2win:
+            if abs(parities[i]) <= min2win:  # no winner yet
                 parities[i] += 1 if c == '1' else - 1  # (c == '1')*2-1 is too clever ;)
     gamma = ''
     epsilon = ''
@@ -30,11 +30,11 @@ def part2_life_support_rating(diagnostic_report: t.Sequence[str]) -> int:
     candidates_initial = set(diagnostic_report)
     o2ns = SimpleNamespace(
         candidates=candidates_initial,
-        winner=lambda x: '0' if x < 0 else '1',
+        critbit=lambda parity: '0' if parity < 0 else '1',
     )
     co2ns = SimpleNamespace(
         candidates=candidates_initial.copy(),
-        winner=lambda x: '1' if x < 0 else '0',
+        critbit=lambda parity: '1' if parity < 0 else '0',
     )
     for (i, ns) in itertools.product(range(bit_len), (o2ns, co2ns)):
         if len(ns.candidates) == 1:
@@ -45,8 +45,8 @@ def part2_life_support_rating(diagnostic_report: t.Sequence[str]) -> int:
             parity += 1 if c[i] == '1' else -1
             if abs(parity) > min2win:
                 break
-        winner = ns.winner(parity)
-        ns.candidates -= {c for c in ns.candidates if c[i] != winner}
+        critbit = ns.critbit(parity)
+        ns.candidates -= {c for c in ns.candidates if c[i] != critbit}
     o2_rating = int(next(iter(o2ns.candidates)), base=2)
     co2_rating = int(next(iter(co2ns.candidates)), base=2)
     return o2_rating * co2_rating
